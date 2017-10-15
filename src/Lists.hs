@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Lists where
 
 import Property
@@ -16,3 +17,6 @@ prop_is_palindrome = Prop $ \xs -> reverse xs == xs
 
 prop_not_palindrome :: Property Bool [Int]
 prop_not_palindrome = Prop $ \xs -> reverse xs /= xs
+
+prop_list_size :: HasOrd bool Int => Int -> Property bool [Int]
+prop_list_size i = Prop $ \xs -> length xs <=. i
