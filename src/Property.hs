@@ -18,6 +18,9 @@ inverse (Prop p) = Prop (not' . p)
 andAlso :: Boolean bool => Property bool a -> Property bool a -> Property bool a
 andAlso (Prop p) (Prop q) = Prop $ \x -> p x &&. q x
 
+(==>) :: Boolean bool => Property bool a -< Property bool a -> Property bool a
+(Prop p) ==> (Prop q) = Prop $ \x -> p x ==>. q x
+
 type Boolean bool = (IsBool bool, HasIf bool bool)
 
 class IsBool bool where
@@ -30,6 +33,9 @@ instance IsBool Bool where
 class HasIf bool t where
   ifE :: bool -> t -> t -> t
 
+  (==>.) :: bool -> bool -> bool
+  a ==>. b = ifE a b true
+
 instance HasIf Bool t where
   ifE a b c = if a then b else c
 
@@ -40,6 +46,12 @@ class HasOrd bool t where
 instance Ord t => HasOrd Bool t where
   (<.)  = (<)
   (<=.) = (<=)
+
+class HasEq bool t where
+  (==.) :: t -> t -> bool
+
+instance Eq t => HasEq Bool t where
+  (==.) = (==)
 
 (&&.) :: Boolean bool => bool -> bool -> bool
 a &&. b = ifE a b false
