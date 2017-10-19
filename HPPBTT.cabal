@@ -21,4 +21,8 @@ library
                      , Continuous
                      , Trees
   build-depends:       base >= 4.7 && < 5
+                     , QuickCheck 
+                     , smallcheck 
+                     , testing-feat
+                     , leancheck
   default-language:    Haskell2010

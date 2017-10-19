@@ -6,7 +6,7 @@ module Property where
 
 data Property bool a = Prop (a -> bool)
 
-testWith :: ((a -> bool) -> IO ()) -> Property bool a -> IO ()
+testWith :: ((a -> bool) -> IO b) -> Property bool a -> IO b
 testWith tool (Prop p) = tool p
 
 apply :: Property bool a -> a -> bool 
@@ -18,7 +18,7 @@ inverse (Prop p) = Prop (not' . p)
 andAlso :: Boolean bool => Property bool a -> Property bool a -> Property bool a
 andAlso (Prop p) (Prop q) = Prop $ \x -> p x &&. q x
 
-(==>) :: Boolean bool => Property bool a -< Property bool a -> Property bool a
+(==>) :: Boolean bool => Property bool a -> Property bool a -> Property bool a
 (Prop p) ==> (Prop q) = Prop $ \x -> p x ==>. q x
 
 type Boolean bool = (IsBool bool, HasIf bool bool)
@@ -32,9 +32,6 @@ instance IsBool Bool where
 
 class HasIf bool t where
   ifE :: bool -> t -> t -> t
-
-  (==>.) :: bool -> bool -> bool
-  a ==>. b = ifE a b true
 
 instance HasIf Bool t where
   ifE a b c = if a then b else c
@@ -61,3 +58,6 @@ not' x = ifE x false true
 
 (>.) :: (Boolean bool, HasOrd bool t) => t -> t -> bool
 x >. y = not' (x <=. y)
+
+(==>.) :: Boolean bool => bool -> bool -> bool
+a ==>. b = ifE a b true
