@@ -155,18 +155,19 @@ run ps = do
       []         -> putStr $ show $ propData ps
       ["single"] -> do
         (s,i) <- fmap read getLine :: IO (Setup,[Int])
-        putStr (show Unsupported) -- TODO: Do stuff
+        res <- lookupProp ps i s
+        putStr (show res)
       _          -> error "Bad command"
     return ()
 
 qc :: Arbitrary a => (a -> QC.Property) -> Setup -> IO Res
-qc   _ _ = undefined
+qc   _ _ = return Unsupported
 sc :: (a -> Bool) -> Setup -> IO Res
-sc   _ _ = undefined
+sc   _ _ = return Unsupported
 feat :: Enumerable a => (a -> XBool) -> Setup -> IO Res
-feat _ _ = undefined
+feat _ _ = return Unsupported
 neat :: Enumerable a => (a -> XBool) -> Setup -> IO Res
-neat _ _ = undefined
+neat _ _ = return Unsupported
 
 
 
