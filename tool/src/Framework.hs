@@ -1,8 +1,13 @@
 {-#LANGUAGE GADTs, Rank2Types #-}
+module Framework where
 
 -- TODO: Tag-sets, filter/exclude by tag/tag-set, input type tags?, catch errors, common driver interface, tag-testing
 
 type XBool = forall bool. Boolean bool => bool
+
+true, false :: XBool
+true  = fromBool True
+false = fromBool False
 
 data Property where
   Property :: Input a => (a -> XBool) -> Property
@@ -13,6 +18,9 @@ class Boolean a where
   (.&&)     :: a -> a -> a
   (.||)     :: a -> a -> a
   nott      :: a -> a
+
+  (.==>)    :: a -> a -> a -- ^ Precondition
+  p .==> q = nott p .|| q
   
   (-||)     :: a -> a -> a -- ^ Parallel OR
   (-||) = (.||)
@@ -98,6 +106,12 @@ data NEATSettings = NEATSettings {}
 data SCSettings = SCSettings {}
     deriving (Show, Read, Eq)
 
+-- @Jonas: Maybe we should consider doing something like this instead?
+data Driver' where
+  Drive :: (forall a. Input a => (a -> XBool) -> IO (Maybe a)) -> Driver'
+
+-- Which would give us something like:
+-- drive' _ (Drive d) (Property f) = d f >>= return . maybe (0,1) (const (1,1))
 
 -- Useable as property input. Should inherit from all generator-classes. 
 class (MyGenerator a) => Input a
@@ -113,7 +127,7 @@ instance Input Bool
 drive = drive' ""
 
 drive' :: String -> Driver -> Property -> IO (Int,Int)
-drive' _ d (Property f) = myDriver f >>= return . maybe (0,1) (const (1,1)) -- TODO: choose real drivers
+drive' _ (Drive d) (Property f) = d f >>= return . maybe (0,1) (const (1,1)) -- TODO: choose real drivers
 drive' indent d p@(PropertySet _ ps) = do
   let name = unwords (getName p)
   putStrLn $ unwords $ 
