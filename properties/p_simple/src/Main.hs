@@ -7,20 +7,20 @@ allProperties :: XProp
 allProperties = 
   PropertySet [Named "Simple properties"] 
     [PropertySet [] 
-      [ Property (p prop_listsaresmall)
-      , Property (p prop_nomonkeys)
+      [ (p prop_listsaresmall)
+      , (p prop_nomonkeys)
       ]
-    , Property (p prop_isother)
+    , (p prop_isother)
     ]
 
-p :: (Arbitrary a, Enumerable a) => 
-  (a -> XBool) -> Setup -> IO Res
-p p d = case driver d of
-  QC{}   -> qc p d 
-  SC{}   -> sc p d 
-  FEAT{} -> feat p d
-  NEAT{} -> neat p d
-  _      -> return Unsupported
+-- Supports QC, NEAT and FEAT
+p :: (Arbitrary a, Enumerable a) => (a -> XBool) -> XProp
+p x = prp withQCandFNEAT x where 
+  withQCandFNEAT = baseEx
+    { eQC = runQC
+    , eNEAT = runNEAT
+    , eFEAT = runFEAT
+    }
 
 main = run allProperties
 
